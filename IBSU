@@ -1,0 +1,146 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.IO.Ports;
+using System.IO;
+using System.Threading;
+
+namespace V1._05
+{
+
+    
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+
+          
+        }
+ 
+
+        private const int DataSize = 13;    
+        private readonly byte[] bufer = new byte[DataSize];
+        byte[] bytes = new byte[12];
+        SerialPort Port = new SerialPort();
+        static Thread mythread;
+        string t;
+        private void button1_Click(object sender, EventArgs e)
+
+        {
+           t = comboBox1.Text.ToString();
+        }
+   
+        
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            textBox2.Invoke(new Action(() => { textBox2.Clear(); }));
+            textBox3.Invoke(new Action(() => { textBox3.Clear(); }));
+            textBox4.Invoke(new Action(() => { textBox4.Clear(); }));
+            textBox5.Invoke(new Action(() => { textBox5.Clear(); }));
+            textBox7.Invoke(new Action(() => { textBox7.Clear(); }));
+            comboBox1.Invoke(new Action(() => { comboBox1.Items.Clear(); }));
+            
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+           
+           mythread = new Thread(myMetod);
+            new Thread(() => myMetod()).Start();
+           
+        }
+
+       
+
+        void myMetod()
+        {
+
+            SerialPort Port = new SerialPort(t, 115200, Parity.None, 8, StopBits.Two);
+            Port.Open();
+            textBox7.Invoke(new Action(() => { textBox7.Text = "Port opened"; }));
+
+            for (int i = 0; i <= 1000; i++)
+               {
+                     Thread.Sleep(980);
+                    Port.Read(bytes, 0, 12);
+                    string s = BitConverter.ToString(bytes);
+                    if (bytes[4] == 0xFF)
+                    {
+                        string x = System.Convert.ToString(bytes[5]);
+                        textBox2.Invoke(new Action(() => { textBox2.Text = x; }));
+                    }
+
+                richTextBox1.Invoke(new Action(() => { richTextBox1.Text += s + "\r\n"; }));
+                string a = System.Convert.ToString(bytes[2]);
+                textBox1.Invoke(new Action(() => { textBox1.Text = a; }));
+                string b = System.Convert.ToString(bytes[4]);
+                textBox2.Invoke(new Action(() => { textBox2.Text = b; }));
+                string c = System.Convert.ToString(bytes[6]);
+                textBox3.Invoke(new Action(() => { textBox3.Text = c; }));
+                string d = System.Convert.ToString(bytes[7]);
+                textBox4.Invoke(new Action(() => { textBox4.Text = d; }));
+                string f = System.Convert.ToString(bytes[8]);
+                textBox5.BeginInvoke(new Action(() => { textBox5.Text = f; }));
+               }
+          }
+            
+        private void button4_Click(object sender, EventArgs e)
+        {
+            string[] ports = SerialPort.GetPortNames();
+            foreach (string port in ports)
+            {
+                comboBox1.Items.Add(port);
+            }
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            Port.Close();
+            mythread.Abort();
+        }
+
+        private void button5_Click_1(object sender, EventArgs e)
+        {
+          Port.Close();
+          textBox7.Text = "Port is closed";  
+          mythread.Abort();
+
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            Port.Close();
+            mythread.Abort();
+        }
+
+        private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button2_Click_1(object sender, EventArgs e)
+        {
+           textBox1.Invoke(new Action(() => { textBox1.Text=" "; }));
+           textBox2.Invoke(new Action(() => { textBox2.Text = " "; }));
+           textBox3.Invoke(new Action(() => { textBox3.Text = " "; }));
+           textBox4.Invoke(new Action(() => { textBox4.Text = " "; }));
+           textBox5.Invoke(new Action(() => { textBox5.Text = " "; }));
+          
+
+
+        }
+
+        
+
+    
+    
+    }
+}
